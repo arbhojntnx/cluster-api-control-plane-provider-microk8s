@@ -1,6 +1,6 @@
 
 # Image URL to use all building/pushing image targets
-IMG ?= cdkbot/capi-control-plane-provider-microk8s:latest
+IMG ?= arvindbhoj/capi-control-plane-provider-microk8s:0.6.11.1
 # ENVTEST_K8S_VERSION refers to the version of kubebuilder assets to be downloaded by envtest binary.
 ENVTEST_K8S_VERSION = 1.23
 # Components file to be used by clusterctl

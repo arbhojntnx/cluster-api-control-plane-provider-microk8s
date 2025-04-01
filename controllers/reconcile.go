@@ -505,14 +505,25 @@ func (r *MicroK8sControlPlaneReconciler) bootstrapCluster(ctx context.Context, t
 	addresses := []string{}
 	for _, machine := range machines {
 		found := false
-
-		for _, addr := range machine.Status.Addresses {
-			if addr.Type == clusterv1.MachineInternalIP {
-				addresses = append(addresses, addr.Address)
+		if machine.Spec.InfrastructureRef.Kind == "PreprovisionedMachine" {
+			var providerID []string = strings.Fields(*machine.Spec.ProviderID)
+			if len(providerID) > 0 {
+				preprovisionedIP := strings.Join(providerID, " ")
+				addresses = append(addresses, preprovisionedIP)
 
 				found = true
+			}
+			break
 
-				break
+		} else {
+			for _, addr := range machine.Status.Addresses {
+				if addr.Type == clusterv1.MachineInternalIP {
+					addresses = append(addresses, addr.Address)
+
+					found = true
+
+					break
+				}
 			}
 		}
 
