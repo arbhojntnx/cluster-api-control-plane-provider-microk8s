@@ -501,19 +501,21 @@ func (r *MicroK8sControlPlaneReconciler) reconcileDelete(ctx context.Context, cl
 }
 
 func (r *MicroK8sControlPlaneReconciler) bootstrapCluster(ctx context.Context, tcp *clusterv1beta1.MicroK8sControlPlane, cluster *clusterv1.Cluster, machines []clusterv1.Machine) error {
-
+	logger := log.FromContext(ctx)
 	addresses := []string{}
 	for _, machine := range machines {
 		found := false
 		if machine.Spec.InfrastructureRef.Kind == "PreprovisionedMachine" {
-			var providerID []string = strings.Fields(*machine.Spec.ProviderID)
-			if len(providerID) > 0 {
-				preprovisionedIP := strings.Join(providerID, " ")
+			if machine.Spec.ProviderID != nil {
+				preprovisionedIP := strings.TrimPrefix(*machine.Spec.ProviderID, "preprovisioned:////")
+				logger.Info(fmt.Sprintf("Extracted IP from providerID is %s\n", preprovisionedIP))
 				addresses = append(addresses, preprovisionedIP)
 
 				found = true
+
+				break
+
 			}
-			break
 
 		} else {
 			for _, addr := range machine.Status.Addresses {
